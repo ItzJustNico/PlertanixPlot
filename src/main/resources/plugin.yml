@@ -1,0 +1,6 @@
+name: PlertanixPlot
+version: '${project.version}'
+main: com.itzjustnico.plertanixplot.main.Main
+api-version: 1.18
+authors: [Itz_Just_Nico]
+description: Plot Plugin for Plertanix
