@@ -14,7 +14,6 @@ public final class Main extends JavaPlugin {
 
         //100x100
         //10 blöcke abstand
-        //test commit :)
 
         plugin = this;
 
