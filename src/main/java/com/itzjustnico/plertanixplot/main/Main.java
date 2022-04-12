@@ -1,5 +1,6 @@
 package com.itzjustnico.plertanixplot.main;
 
+import com.itzjustnico.plertanixplot.commands.PlotCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
@@ -40,7 +41,7 @@ public final class Main extends JavaPlugin {
     }
 
     private void registerCommands() {
-        //getCommand("elements").setExecutor(new ElementsCommand());
+        getCommand("p").setExecutor(new PlotCommand());
     }
     public static Main getPlugin() {
         return plugin;
