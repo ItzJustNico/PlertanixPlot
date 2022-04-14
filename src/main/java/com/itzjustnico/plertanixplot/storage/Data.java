@@ -6,7 +6,7 @@ import java.io.File;
 
 public class Data {
 
-    public static File file = new File("plugins//PlertanixPlot//plots.yml");
+    public static File file = new File("plugins//PlertanixPlot//settings.yml");
     public static YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 
     private static final String noPermission = "§cDazu hast du keine Rechte!";

@@ -1,5 +1,7 @@
 package com.itzjustnico.plertanixplot.main;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.itzjustnico.plertanixplot.commands.PlotCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class Main extends JavaPlugin {
 
     private static Main plugin;
+    private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
     public void onEnable() {
