@@ -8,6 +8,7 @@ import com.itzjustnico.plertanixplot.json.PluginJsonWriter;
 import com.itzjustnico.plertanixplot.storage.Math;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -61,6 +62,11 @@ public class PlotCommand implements CommandExecutor {
                                     //min/max Z
                                     //owner Player
                                     //trusted Players
+
+                        System.out.println("Test");
+                        new PlotHandler().placePlotOnNextAvailable(Material.WHITE_CONCRETE);
+
+                        System.out.println("Test2");
 
                         //create Plot json
                         new PlotHandler().createPlotJson(player.getUniqueId());
