@@ -15,10 +15,14 @@ public class PlotData extends JsonDataFile {
     private int minZ;
     private int maxZ;
 
-    public PlotData(File file, UUID id, UUID owner) {
+    public PlotData(File file, UUID id, UUID owner, int minX, int maxX, int minZ, int maxZ) {
         super(file);
         this.owner = owner.toString();
         this.id = id.toString();
+        this.maxX = maxX;
+        this.minX = minX;
+        this.minZ = minZ;
+        this.maxZ = maxZ;
     }
 
     public PlotData(URI fileUri) {

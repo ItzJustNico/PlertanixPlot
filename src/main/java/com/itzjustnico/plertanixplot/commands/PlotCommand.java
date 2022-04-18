@@ -37,8 +37,7 @@ public class PlotCommand implements CommandExecutor {
 
                 if (args.length == 1) {
                     if (args[0].equalsIgnoreCase("create")) {
-                        player.sendMessage(Data.getPrefix() + "§aDer Plot wurde erfolgreich erstellt.");
-                        player.sendMessage(Data.getPrefix() + "§7Besuche ihn mit §6/P Home§7.");
+
                         //create Plot on Map
                             //wo?
                             //ausgangspunkt -> mitte 1. plot oder so
@@ -63,13 +62,14 @@ public class PlotCommand implements CommandExecutor {
                                     //owner Player
                                     //trusted Players
 
-                        System.out.println("Test");
-                        new PlotHandler().placePlotOnNextAvailable(Material.WHITE_CONCRETE);
 
+                        System.out.println("Test");
+                        PlotHandler plotHandler = new PlotHandler();
+                        plotHandler.placePlotOnNextAvailable(Material.WHITE_CONCRETE, player);
                         System.out.println("Test2");
 
                         //create Plot json
-                        new PlotHandler().createPlotJson(player.getUniqueId());
+                        new PlotHandler().createPlotJson(player.getUniqueId(), plotHandler.getMinX(), plotHandler.getMaxX(), plotHandler.getMinZ(), plotHandler.getMaxZ());
 
                     } else if (args[0].equalsIgnoreCase("help")) {
                         sendCommands(player);
