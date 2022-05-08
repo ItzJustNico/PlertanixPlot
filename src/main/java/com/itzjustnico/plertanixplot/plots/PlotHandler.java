@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import redempt.redlib.multiblock.MultiBlockStructure;
 
 import java.io.File;
 import java.util.HashMap;
@@ -17,23 +18,24 @@ import java.util.UUID;
 public class PlotHandler {
 
     private final HashMap<UUID, PlotData> plotData = new HashMap<>();
-    private final File directory = new File(Main.getPlugin().getDataFolder(), "/plots");
     private int minX;
     private int maxX;
     private int minZ;
     private int maxZ;
+    private int waterY;
 
     public PlotHandler() {
+        File directory = new File(Main.getPlugin().getDataFolder(), "/plots");
         for (File file : directory.listFiles()) {
             final PlotData data = (PlotData) new PluginJsonWriter().getDataFromFile(file, PlotData.class);
             plotData.putIfAbsent(data.getId(), data);
         }
     }
 
-    public void createPlotJson(UUID plotOwner, int minX, int maxX, int minZ, int maxZ) {
+    public void createPlotJson(UUID plotOwner, int minX, int maxX, int minZ, int maxZ, int waterY) {
         UUID randomUUID = UUID.randomUUID();
         File writeToFile = new File(Main.getPlugin().getDataFolder() +  "/plots", randomUUID.toString() + ".json");
-        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, randomUUID, plotOwner, minX, maxX, minZ, maxZ));
+        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, randomUUID, plotOwner, minX, maxX, minZ, maxZ, waterY));
     }
 
     //Block is occupied by a plot
@@ -42,16 +44,15 @@ public class PlotHandler {
         int blockX = block.getLocation().getBlockX();
         int blockZ = block.getLocation().getBlockZ();
 
-        System.out.println("Values:");
-        System.out.println(plotData.values());
         for (PlotData plotData : plotData.values()) {
-            System.out.println(blockX);
-            System.out.println(plotData.getMaxX());
-            System.out.println(plotData.getMinX());
-            if (blockX <= plotData.getMaxX() || blockX >= plotData.getMinX() || blockZ <= plotData.getMaxZ() || blockZ >= plotData.getMinZ()) {
-                isOccupied = true;
+            if (blockX <= plotData.getMaxX() && blockX >= plotData.getMinX()) {
+                if (blockZ <= plotData.getMaxZ() && blockZ >= plotData.getMinZ()) {
+                    isOccupied = true;
+                    break;
+                }
             }
         }
+
         return isOccupied;
     }
 
@@ -62,41 +63,35 @@ public class PlotHandler {
         Location plotBlock1 = root1.clone();
         Location plotBlock2 = root2.clone();
 
-        System.out.println(plotBlock1);
-        System.out.println(plotBlock2);
-
         Block[] blocks = new Block[2];
 
         boolean foundPlot = false;
         int maxRuns = 1;
-        int offset = 7;
+        int offset = 25;
         while (!foundPlot) {
-            System.out.println(maxRuns);
-            System.out.println(offset);
+
             //x loop
             for (int i = 0; i < maxRuns; i++) {
-                plotBlock1.setX(root1.getX() + offset);
-                plotBlock2.setX(root2.getX() + offset);
-                System.out.println(plotBlock1);
-                System.out.println(plotBlock2);
-                if (blockOccupied(plotBlock1.getBlock())) {
-                    System.out.println("Is occupied");
-                } else {
-                    System.out.println("not Occupied");
+                plotBlock1.setX(plotBlock1.getX() + offset);
+                plotBlock2.setX(plotBlock2.getX() + offset);
+                if (!blockOccupied(plotBlock1.getBlock())) {
                     blocks[0] = plotBlock1.getBlock();
                     blocks[1] = plotBlock2.getBlock();
                     foundPlot = true;
+                    break;
                 }
             }
+
             //z loop
-            if (foundPlot == false) {
+            if (!foundPlot) {
                 for (int i = 0; i < maxRuns; i++) {
-                    plotBlock1.setZ(root1.getZ() - offset);
-                    plotBlock2.setZ(root2.getZ() - offset);
-                    if (!blockOccupied(plotBlock1.getBlock()) && !blockOccupied(plotBlock2.getBlock())) {
+                    plotBlock1.setZ(plotBlock1.getZ() - offset);
+                    plotBlock2.setZ(plotBlock2.getZ() - offset);
+                    if (!blockOccupied(plotBlock1.getBlock())) {
                         blocks[0] = plotBlock1.getBlock();
                         blocks[1] = plotBlock2.getBlock();
                         foundPlot = true;
+                        break;
                     }
                 }
             }
@@ -110,18 +105,19 @@ public class PlotHandler {
         return blocks;
     }
 
-    public void placePlotOnNextAvailable(Material material, Player player) {
+    public boolean placePlotOnNextAvailable(Material material, Player player) {
         Block[] blocks = new PlotHandler().getNextAvailablePlot();
         Block block1 = blocks[0];
         Block block2 = blocks[1];
         if (block1 == null || block2 == null) {
-            System.out.println( ChatColor.RED + "AN ERROR OCCURRED: NO PLOT AVAILABLE");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "AN ERROR OCCURRED: NO PLOT AVAILABLE");
             player.sendMessage(Data.getPrefix() + "§cEs ist kein Platz für einen weiteren Plot.");
-            return;
+            return false;
         }
 
-        Location placeLocation = new Location(Bukkit.getWorld("world"), 0, 0, 0);
+        Location placeLocation = new Location(player.getWorld(), 0, 0, 0);
         placeLocation.setY(block1.getY());
+        waterY = placeLocation.getBlockY() - 1;
         if (block1.getX() < block2.getX()) {
             placeLocation.setX(block1.getX());
             minX = block1.getX();
@@ -142,7 +138,7 @@ public class PlotHandler {
         }
 
         System.out.println(placeLocation);
-        int squareSize = 5;
+        int squareSize = 20;
         placeLocation.getBlock().setType(material);
         for (int i = 1; i < squareSize; i++) {
             placeLocation.setX(placeLocation.getX() + 1);
@@ -160,10 +156,84 @@ public class PlotHandler {
             placeLocation.setZ(placeLocation.getZ() - 1);
             placeLocation.getBlock().setType(material);
         }
-
-
+        placeBoat(block1, player);
         player.sendMessage(Data.getPrefix() + "§aDer Plot wurde erfolgreich erstellt.");
         player.sendMessage(Data.getPrefix() + "§7Besuche ihn mit §6/P Home§7.");
+        return true;
+    }
+
+    public void placeBoat(Block block1, Player player) {
+        double middleLocX = (minX + (maxX - minX) / 2) -4;
+        double middleLocZ = (minZ + (maxZ - minZ) / 2) -7;
+        Location middleLoc = new Location(player.getWorld(), middleLocX, block1.getY(), middleLocZ);
+        MultiBlockStructure.create(Main.getPlugin().getResource("plotBoat.dat"), "plotBoat").build(middleLoc);
+    }
+
+    public boolean hasPlot(Player player) {
+        boolean hasPlot = false;
+        for (PlotData plotData : plotData.values()) {
+            if (plotData.getOwner().equals(player.getUniqueId())) {
+                hasPlot = true;
+            }
+        }
+        return hasPlot;
+    }
+
+    public PlotData getPlot(Player owner) {
+        for (PlotData plotData : plotData.values()) {
+            if (plotData.getOwner().equals(owner.getUniqueId())) {
+                return plotData;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if deleting the File worked correctly.
+     * Returns false if the Player doesn't own a plot.
+     * @param  plotOwner  the owner of the plot that should be deleted
+     * @return      if the delete worked correctly
+     */
+    public boolean deletePlotJson(Player plotOwner) {
+        boolean deleteWorked = false;
+        PlotData plotData = getPlot(plotOwner);
+        if (plotData != null) {
+            File fileToDelete = new File(Main.getPlugin().getDataFolder() +  "/plots", getPlot(plotOwner).getId() + ".json");
+            fileToDelete.delete();
+            deleteWorked = true;
+        }
+        return deleteWorked;
+    }
+
+    /**
+     * Returns true if deleting the Plot worked correctly.
+     * Returns false if the Player doesn't own a plot.
+     * @param  plotOwner  the owner of the plot which should be deleted
+     * @return      if the delete worked correctly
+     */
+    public boolean deletePlot(Player plotOwner) {
+        boolean deleteWorked = false;
+        PlotData plotData = getPlot(plotOwner);
+        if (plotData != null) {
+            int xMax = plotData.getMaxX();
+            int xMin = plotData.getMinX();
+            int zMax = plotData.getMaxZ();
+            int zMin = plotData.getMinZ();
+            int yMax = 320;
+            int yMin = plotData.getWaterY() + 1;
+            for (int x = xMin; x <= xMax; x++) {
+                for (int z = zMin; z <= zMax; z++) {
+                    for (int y = yMin; y <= yMax; y++) {
+                        Location location = new Location(plotOwner.getWorld(), x, y, z);
+                        location.getBlock().setType(Material.AIR);
+                    }
+                }
+            }
+            if (deletePlotJson(plotOwner)) {
+                deleteWorked = true;
+            }
+        }
+        return deleteWorked;
     }
 
     public HashMap<UUID, PlotData> getPlotData() {
@@ -184,5 +254,9 @@ public class PlotHandler {
 
     public int getMaxZ() {
         return maxZ;
+    }
+
+    public int getWaterY() {
+        return waterY;
     }
 }

@@ -7,12 +7,15 @@ import com.itzjustnico.plertanixplot.plots.PlotData;
 import com.itzjustnico.plertanixplot.json.PluginJsonWriter;
 import com.itzjustnico.plertanixplot.storage.Math;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import redempt.redlib.multiblock.MultiBlockStructure;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,9 +28,12 @@ public class PlotCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         //p create
+        //p delete
+        //p delete <Owner>
         //p invite <Player>
         //p remove <Player>
         //p home
+        //p info
 
         //p root
 
@@ -63,14 +69,25 @@ public class PlotCommand implements CommandExecutor {
                                     //trusted Players
 
 
-                        System.out.println("Test");
+
                         PlotHandler plotHandler = new PlotHandler();
-                        plotHandler.placePlotOnNextAvailable(Material.WHITE_CONCRETE, player);
-                        System.out.println("Test2");
+                        if (!plotHandler.hasPlot(player) || player.hasPermission("morePlots")) {
+                            if (plotHandler.placePlotOnNextAvailable(Material.LILY_PAD, player)) {
+                                //create Plot json
+                                new PlotHandler().createPlotJson(player.getUniqueId(), plotHandler.getMinX(), plotHandler.getMaxX(), plotHandler.getMinZ(), plotHandler.getMaxZ(), plotHandler.getWaterY());
+                                Bukkit.getConsoleSender().sendMessage(Data.getPrefix() + ChatColor.GREEN + "A new Plot has been created!");
+                            }
+                        } else {
+                            player.sendMessage(Data.getPrefix() + "§cDu hast bereits einen Plot!");
+                        }
 
-                        //create Plot json
-                        new PlotHandler().createPlotJson(player.getUniqueId(), plotHandler.getMinX(), plotHandler.getMaxX(), plotHandler.getMinZ(), plotHandler.getMaxZ());
-
+                    } else if (args[0].equalsIgnoreCase("delete")) {
+                        PlotHandler plotHandler = new PlotHandler();
+                        if (plotHandler.deletePlot(player)) {
+                            player.sendMessage(Data.getPrefix() + "§aDein Plot wurde erfolgreich gelöscht!");
+                        } else {
+                            player.sendMessage(Data.getPrefix() + "§cDu besitzt keinen Plot!");
+                        }
                     } else if (args[0].equalsIgnoreCase("help")) {
                         sendCommands(player);
                     } else {
@@ -83,6 +100,20 @@ public class PlotCommand implements CommandExecutor {
                         if (target != null) {
                             player.sendMessage(Data.getPrefix() + "§a");
                         }
+
+                    } if (args[0].equalsIgnoreCase("delete")) {
+                        PlotHandler plotHandler = new PlotHandler();
+                        Player target = Bukkit.getPlayer(args[1]);
+                        if (target != null) {
+                            if (plotHandler.deletePlot(target)) {
+                                player.sendMessage(Data.getPrefix() + "§aDer Plot von §6" + target.getName() + "§a wurde erfolgreich gelöscht!");
+                            } else {
+                                player.sendMessage(Data.getPrefix() + "§cDu besitzt keinen Plot!");
+                            }
+                        } else {
+                            player.sendMessage(Data.getPrefix() + "§cDer Spieler konnte nicht gefunden werden!");
+                        }
+
 
                     } else if (args[0].equalsIgnoreCase("root")) {
                         if (Math.isInt(args[1])) {

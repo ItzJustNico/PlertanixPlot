@@ -14,8 +14,9 @@ public class PlotData extends JsonDataFile {
     private int maxX;
     private int minZ;
     private int maxZ;
+    private int waterY;
 
-    public PlotData(File file, UUID id, UUID owner, int minX, int maxX, int minZ, int maxZ) {
+    public PlotData(File file, UUID id, UUID owner, int minX, int maxX, int minZ, int maxZ, int waterY) {
         super(file);
         this.owner = owner.toString();
         this.id = id.toString();
@@ -23,6 +24,7 @@ public class PlotData extends JsonDataFile {
         this.minX = minX;
         this.minZ = minZ;
         this.maxZ = maxZ;
+        this.waterY = waterY;
     }
 
     public PlotData(URI fileUri) {
@@ -51,5 +53,9 @@ public class PlotData extends JsonDataFile {
 
     public int getMaxZ() {
         return maxZ;
+    }
+
+    public int getWaterY() {
+        return waterY;
     }
 }
