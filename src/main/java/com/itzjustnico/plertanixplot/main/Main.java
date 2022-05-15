@@ -3,10 +3,15 @@ package com.itzjustnico.plertanixplot.main;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.itzjustnico.plertanixplot.commands.PlotCommand;
+import com.itzjustnico.plertanixplot.listener.BlockBreakListener;
+import com.itzjustnico.plertanixplot.listener.BlockPlaceListener;
+import com.itzjustnico.plertanixplot.storage.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class Main extends JavaPlugin {
 
@@ -23,6 +28,7 @@ public final class Main extends JavaPlugin {
 
         listenerRegistration();
         registerCommands();
+        new ConfigManager().registerConfig();
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "==================================================================");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "PlertanixPlot wurde erfolgreich gestartet!");
@@ -40,7 +46,8 @@ public final class Main extends JavaPlugin {
 
     private void listenerRegistration() {
         PluginManager pluginManager = Bukkit.getPluginManager();
-        //pluginManager.registerEvents(new QuitListener(), this);
+        pluginManager.registerEvents(new BlockBreakListener(), this);
+        pluginManager.registerEvents(new BlockPlaceListener(), this);
     }
 
     private void registerCommands() {

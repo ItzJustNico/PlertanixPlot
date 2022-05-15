@@ -13,6 +13,7 @@ import redempt.redlib.multiblock.MultiBlockStructure;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class PlotHandler {
@@ -32,10 +33,19 @@ public class PlotHandler {
         }
     }
 
-    public void createPlotJson(UUID plotOwner, int minX, int maxX, int minZ, int maxZ, int waterY) {
+    public void createPlotJson(UUID plotOwner, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY) {
         UUID randomUUID = UUID.randomUUID();
         File writeToFile = new File(Main.getPlugin().getDataFolder() +  "/plots", randomUUID.toString() + ".json");
-        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, randomUUID, plotOwner, minX, maxX, minZ, maxZ, waterY));
+        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, randomUUID, plotOwner, plotName, minX, maxX, minZ, maxZ, waterY));
+    }
+
+    public void updatePlotJson(PlotData updatedPlotData) {
+        deletePlotJson(Bukkit.getPlayer(updatedPlotData.getOwner()), updatedPlotData.getName());
+        new PluginJsonWriter().writeDataToFile(updatedPlotData);
+        if (plotData.containsKey(updatedPlotData.getId())) {
+            plotData.remove(updatedPlotData.getId());
+        }
+        plotData.putIfAbsent(updatedPlotData.getId(), updatedPlotData);
     }
 
     //Block is occupied by a plot
@@ -169,6 +179,26 @@ public class PlotHandler {
         MultiBlockStructure.create(Main.getPlugin().getResource("plotBoat.dat"), "plotBoat").build(middleLoc);
     }
 
+    public int getPlotAmount(Player player) {
+        int amount = 0;
+        for (PlotData plotData : plotData.values()) {
+            if (plotData.getOwner().equals(player.getUniqueId())) {
+                amount++;
+            }
+        }
+        return amount;
+    }
+
+    public boolean checkIfNameDuplicate(Player player, String plotName) {
+        boolean duplicate = false;
+        for (PlotData plotData : plotData.values()) {
+            if (plotData.getOwner().equals(player.getUniqueId()) && plotData.getName().equals(plotName)) {
+                duplicate = true;
+            }
+        }
+        return duplicate;
+    }
+
     public boolean hasPlot(Player player) {
         boolean hasPlot = false;
         for (PlotData plotData : plotData.values()) {
@@ -179,9 +209,48 @@ public class PlotHandler {
         return hasPlot;
     }
 
-    public PlotData getPlot(Player owner) {
+    public void listPlots(Player player) {
+        player.sendMessage("§7§l---------§r§6Plots-" + player.getName() + "§7§l---------");
+
+        for (PlotData plotData : plotData.values()) {
+            if (plotData.getOwner().equals(player.getUniqueId())) {
+                player.sendMessage("§7 - §6" + plotData.getName());
+            }
+        }
+    }
+
+    public void addToTrusted(PlotData plotData, Player trustedPlayer) {
+        if (plotData != null) {
+            List<UUID> list = plotData.getTrustedPlayers();
+            list.add(trustedPlayer.getUniqueId());
+            plotData.setTrustedPlayers(list);
+            updatePlotJson(plotData);
+            Bukkit.getPlayer(plotData.getOwner()).sendMessage(Data.getPrefix() + "§aDer Spieler§6 " + trustedPlayer.getName() + "§a wurde eingeladen.");
+        }
+    }
+
+    public boolean checkBlockOnPlot(Player owner, Block block) {
+        boolean blockBreakable = false;
+        int blockX = block.getX();
+        int blockY = block.getY();
+        int blockZ = block.getZ();
         for (PlotData plotData : plotData.values()) {
             if (plotData.getOwner().equals(owner.getUniqueId())) {
+                if (blockX < plotData.getMaxX() && blockX > plotData.getMinX()) {
+                    if (blockZ < plotData.getMaxZ() && blockZ > plotData.getMinZ()) {
+                        if (blockY <= 320) {
+                            blockBreakable = true;
+                        }
+                    }
+                }
+            }
+        }
+        return blockBreakable;
+    }
+
+    public PlotData getPlot(Player owner, String plotName) {
+        for (PlotData plotData : plotData.values()) {
+            if (plotData.getOwner().equals(owner.getUniqueId()) && plotData.getName().equals(plotName)) {
                 return plotData;
             }
         }
@@ -194,11 +263,27 @@ public class PlotHandler {
      * @param  plotOwner  the owner of the plot that should be deleted
      * @return      if the delete worked correctly
      */
-    public boolean deletePlotJson(Player plotOwner) {
+    public boolean deletePlotJson(Player plotOwner, String plotName) {
         boolean deleteWorked = false;
-        PlotData plotData = getPlot(plotOwner);
+        PlotData plotData = getPlot(plotOwner, plotName);
         if (plotData != null) {
-            File fileToDelete = new File(Main.getPlugin().getDataFolder() +  "/plots", getPlot(plotOwner).getId() + ".json");
+            File fileToDelete = new File(Main.getPlugin().getDataFolder() +  "/plots", getPlot(plotOwner, plotName).getId() + ".json");
+            fileToDelete.delete();
+            deleteWorked = true;
+        }
+        return deleteWorked;
+    }
+
+    /**
+     * Returns true if deleting the File worked correctly.
+     * Returns false if the Player doesn't own a plot.
+     * @param  plotData the Plot that is going to be deleted
+     * @return      if the delete worked correctly
+     */
+    public boolean deletePlotJson(PlotData plotData) {
+        boolean deleteWorked = false;
+        if (plotData != null) {
+            File fileToDelete = new File(Main.getPlugin().getDataFolder() +  "/plots", plotData.getId() + ".json");
             fileToDelete.delete();
             deleteWorked = true;
         }
@@ -211,9 +296,9 @@ public class PlotHandler {
      * @param  plotOwner  the owner of the plot which should be deleted
      * @return      if the delete worked correctly
      */
-    public boolean deletePlot(Player plotOwner) {
+    public boolean deletePlot(Player plotOwner, String plotName) {
         boolean deleteWorked = false;
-        PlotData plotData = getPlot(plotOwner);
+        PlotData plotData = getPlot(plotOwner, plotName);
         if (plotData != null) {
             int xMax = plotData.getMaxX();
             int xMin = plotData.getMinX();
@@ -229,7 +314,7 @@ public class PlotHandler {
                     }
                 }
             }
-            if (deletePlotJson(plotOwner)) {
+            if (deletePlotJson(plotOwner, plotName)) {
                 deleteWorked = true;
             }
         }
