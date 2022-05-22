@@ -1,5 +1,6 @@
 package com.itzjustnico.plertanixplot.plots;
 
+import com.google.gson.TypeAdapter;
 import com.itzjustnico.plertanixplot.json.PluginJsonWriter;
 import com.itzjustnico.plertanixplot.main.Main;
 import com.itzjustnico.plertanixplot.storage.Data;
@@ -30,6 +31,7 @@ public class PlotHandler {
         File directory = new File(Main.getPlugin().getDataFolder(), "/plots");
         for (File file : directory.listFiles()) {
             final PlotData data = (PlotData) new PluginJsonWriter().getDataFromFile(file, PlotData.class);
+            System.out.println(data);
             plotData.putIfAbsent(data.getId(), data);
         }
     }
@@ -41,9 +43,8 @@ public class PlotHandler {
     }
 
     public void updatePlotJson(PlotData updatedPlotData) {
-        UUID randomUUID = UUID.randomUUID();
         File writeToFile = new File(Main.getPlugin().getDataFolder() +  "/plots", updatedPlotData.getId() + ".json");
-        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, updatedPlotData.getId(), updatedPlotData.getOwner(), updatedPlotData.getTrustedPlayers(), updatedPlotData.getName(), updatedPlotData.getMinX(), updatedPlotData.getMaxX(), updatedPlotData.getMinZ(), updatedPlotData.getMaxZ(), updatedPlotData.getWaterY(), updatedPlotData.getHome()));
+        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, updatedPlotData.getId(), updatedPlotData.getOwner(), updatedPlotData.getTrustedPlayers(), updatedPlotData.getName(), updatedPlotData.getMinX(), updatedPlotData.getMaxX(), updatedPlotData.getMinZ(), updatedPlotData.getMaxZ(), updatedPlotData.getWaterY(), updatedPlotData.getHomeLocation()));
 
         if (plotData.containsKey(updatedPlotData.getId())) {
             plotData.remove(updatedPlotData.getId());
@@ -248,7 +249,7 @@ public class PlotHandler {
         return false;
     }
 
-    public boolean checkBlockOnPlot(Player player, Block block) {
+    public boolean checkBlockOnPlotBreakable(Player player, Block block) {
         boolean blockBreakable = false;
         int blockX = block.getX();
         int blockY = block.getY();
@@ -278,9 +279,25 @@ public class PlotHandler {
         return null;
     }
 
+    public PlotData getPlotFromBlock(Block block) {
+        int blockX = block.getX();
+        int blockY = block.getY();
+        int blockZ = block.getZ();
+        for (PlotData plotData : plotData.values()) {
+            if (blockX < plotData.getMaxX() && blockX > plotData.getMinX()) {
+                if (blockZ < plotData.getMaxZ() && blockZ > plotData.getMinZ()) {
+                    if (blockY <= 320) {
+                        return plotData;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public boolean setHome(PlotData plotData, Location homeLocation) {
         if (plotData != null) {
-            plotData.setHome(homeLocation);
+            plotData.setHomeLocation(homeLocation);
             updatePlotJson(plotData);
             return true;
         }
@@ -290,8 +307,8 @@ public class PlotHandler {
     public boolean teleportHome(String plotName, Player player) {
         PlotData plotData = getPlot(player, plotName);
         if (plotData != null) {
-            if (plotData.getHome() != null) {
-                player.teleport(plotData.getHome());
+            if (plotData.getHomeLocation() != null) {
+                player.teleport(plotData.getHomeLocation());
                 return true;
             } else {
                 player.sendMessage(Data.getPrefix() + "§cDu musst die Home-Location zuerst mit §6/p setHome <PlotName>§c setzten.");

@@ -10,13 +10,16 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class PlotCommand implements CommandExecutor {
 
@@ -34,8 +37,8 @@ public class PlotCommand implements CommandExecutor {
         //p invite deny     ✔️
         //p remove <Player> <PlotName>  ✔️
 
-        //p home <PlotName>
-        //p setHome <PlotName>
+        //p home <PlotName>     ✔️
+        //p setHome <PlotName>  ✔️
         //p info
         //p list <Player>   ✔️
 
@@ -69,7 +72,34 @@ public class PlotCommand implements CommandExecutor {
                     //min/max Z
                     //owner Player
                     //trusted Players
-                    if (args[0].equalsIgnoreCase("list")) {
+                    if (args[0].equalsIgnoreCase("info")) {
+                        PlotHandler plotHandler = new PlotHandler();
+                        PlotData plotData = plotHandler.getPlotFromBlock(player.getLocation().getBlock().getRelative(BlockFace.DOWN));
+                        if (plotData != null) {
+                            player.sendMessage("§f§l--------§r§6 Grundstücksinfo §f§l--------");
+                            player.sendMessage("§7Owner: §e" + Bukkit.getPlayer(plotData.getOwner()).getName());
+                            player.sendMessage("§7Name: §e" + plotData.getName());
+
+                            List<UUID> trustedPlayer = plotData.getTrustedPlayers();
+                            String message = "§7Vertraut: §e";
+                            int i = 0;
+                            for (UUID uuid : trustedPlayer) {
+                                if (i > 0) {
+                                    message += "§7, §e";
+                                }
+                                message += Bukkit.getPlayer(uuid).getName();
+                                i++;
+                            }
+                            if (i == 0) {
+                                message += "§7Niemand";
+                            }
+                            player.sendMessage(message);
+                            player.sendMessage("§f§l---------§r§6 PlertanixPlot §f§l---------");
+
+                        } else {
+                            player.sendMessage(Data.getPrefix() + "§cHier befindet sich kein Grundstück.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("list")) {
                         new PlotHandler().listPlots(player);
                     } else if (args[0].equalsIgnoreCase("help")) {
                         sendCommands(player);

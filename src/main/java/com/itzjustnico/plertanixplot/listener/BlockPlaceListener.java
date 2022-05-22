@@ -19,7 +19,7 @@ public class BlockPlaceListener implements Listener {
             if (!plotHandler.hasPlot(player)) {
                 event.setCancelled(true);
                 player.sendMessage(Data.getPrefix() + "§cDu kannst diesen Block hier nicht platzieren!");
-            } else if (!plotHandler.checkBlockOnPlot(player, block)) {
+            } else if (!plotHandler.checkBlockOnPlotBreakable(player, block)) {
                 event.setCancelled(true);
                 player.sendMessage(Data.getPrefix() + "§cDu kannst diesen Block hier nicht platzieren!");
             }

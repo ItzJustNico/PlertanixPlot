@@ -1,7 +1,11 @@
 package com.itzjustnico.plertanixplot.plots;
 
+import com.google.gson.TypeAdapter;
 import com.itzjustnico.plertanixplot.json.JsonDataFile;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.net.URI;
@@ -20,7 +24,14 @@ public class PlotData extends JsonDataFile {
     private int minZ;
     private int maxZ;
     private int waterY;
-    private Location home;
+
+    private int homeX;
+    private int homeY;
+    private int homeZ;
+    private float homeYaw;
+    private float homePitch;
+    private String homeWorldName;
+
 
     public PlotData(File file, UUID id, UUID owner, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY) {
         super(file);
@@ -35,7 +46,7 @@ public class PlotData extends JsonDataFile {
         this.trustedPlayers = new ArrayList<>();
     }
 
-    public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY, Location home) {
+    public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY, Location homeLocation) {
         super(file);
         this.id = id.toString();
         this.owner = owner.toString();
@@ -46,7 +57,13 @@ public class PlotData extends JsonDataFile {
         this.maxZ = maxZ;
         this.waterY = waterY;
         this.trustedPlayers = trustedPlayers;
-        this.home = home;
+
+        this.homeX = homeLocation.getBlockX();
+        this.homeY = homeLocation.getBlockY();
+        this.homeZ = homeLocation.getBlockZ();
+        this.homeYaw = homeLocation.getYaw();
+        this.homePitch = homeLocation.getPitch();
+        this.homeWorldName = homeLocation.getWorld().getName();
     }
 
     public PlotData(URI fileUri) {
@@ -89,12 +106,25 @@ public class PlotData extends JsonDataFile {
         return trustedPlayers;
     }
 
-    public Location getHome() {
-        return home;
+    public float getHomePitch() {
+        return homePitch;
     }
 
-    public void setHome(Location home) {
-        this.home = home;
+    public float getHomeYaw() {
+        return homeYaw;
+    }
+
+    public Location getHomeLocation() {
+        return new Location(Bukkit.getWorld(homeWorldName), homeX, homeY, homeZ, homeYaw, homePitch);
+    }
+
+    public void setHomeLocation(Location homeLocation) {
+        this.homeWorldName = homeLocation.getWorld().getName();
+        this.homeX = homeLocation.getBlockX();
+        this.homeY = homeLocation.getBlockY();
+        this.homeZ = homeLocation.getBlockZ();
+        this.homeYaw = homeLocation.getYaw();
+        this.homePitch = homeLocation.getPitch();
     }
 
     public void setTrustedPlayers(List<UUID> trustedPlayers) {

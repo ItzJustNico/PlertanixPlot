@@ -19,7 +19,7 @@ public class BlockBreakListener implements Listener {
             if (!plotHandler.hasPlot(player)) {
                 event.setCancelled(true);
                 player.sendMessage(Data.getPrefix() + "§cDu kannst diesen Block nicht zerstören!");
-            } else if (!plotHandler.checkBlockOnPlot(player, block)) {
+            } else if (!plotHandler.checkBlockOnPlotBreakable(player, block)) {
                 event.setCancelled(true);
                 player.sendMessage(Data.getPrefix() + "§cDu kannst diesen Block nicht zerstören!");
             }
