@@ -49,29 +49,6 @@ public class PlotCommand implements CommandExecutor {
             if (cmd.getName().equalsIgnoreCase("p")) {
 
                 if (args.length == 1) {
-                    //create Plot on Map
-                    //wo?
-                    //ausgangspunkt -> mitte 1. plot oder so
-                    //spiralen-förmig rundherum
-                    // -> nächsten platz suchen
-                    //plot platzieren -> für test concrete
-                    //lily pads platzieren
-                    //Bot laden + platzieren
-
-                    //add Plot + Player + cords in yml
-                    //Plot speichern:
-
-                    //List of Plots
-                    //Plot1
-                    //min/max X
-                    //min/max Z
-                    //owner Player
-                    //trusted Players
-                    //Plot2
-                    //min/max X
-                    //min/max Z
-                    //owner Player
-                    //trusted Players
                     if (args[0].equalsIgnoreCase("info")) {
                         PlotHandler plotHandler = new PlotHandler();
                         PlotData plotData = plotHandler.getPlotFromBlock(player.getLocation().getBlock().getRelative(BlockFace.DOWN));
