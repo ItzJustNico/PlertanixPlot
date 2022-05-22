@@ -1,42 +1,45 @@
 package com.itzjustnico.plertanixplot.commands;
 
-import com.itzjustnico.plertanixplot.main.Main;
+import com.itzjustnico.plertanixplot.plots.PlotData;
 import com.itzjustnico.plertanixplot.plots.PlotHandler;
 import com.itzjustnico.plertanixplot.storage.Data;
-import com.itzjustnico.plertanixplot.plots.PlotData;
-import com.itzjustnico.plertanixplot.json.PluginJsonWriter;
 import com.itzjustnico.plertanixplot.storage.Math;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import redempt.redlib.multiblock.MultiBlockStructure;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.UUID;
 
 public class PlotCommand implements CommandExecutor {
 
+    private PlotData plotData;
+    private Player target;
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        //p create <plotName>
-        //p delete <plotName>
-        //p delete <plotName> <Owner>
-        //p invite <Player> <PlotName>
-        //p remove <Player>
-        //p home
-        //p info
-        //p list <Player>
+        //p create <plotName>   ✔️
+        //p delete <plotName>   ✔️
+        //p delete <plotName> <Owner>   ✔️
 
-        //p root
+        //p invite <Player> <PlotName>
+        //p invite accept   ✔️
+        //p invite deny     ✔️
+        //p remove <Player> <PlotName>  ✔️
+
+        //p home <PlotName>
+        //p setHome <PlotName>
+        //p info
+        //p list <Player>   ✔️
+
+        //p root    ✔️
 
         if (sender instanceof Player) {
             Player player = (Player) sender;
@@ -46,7 +49,7 @@ public class PlotCommand implements CommandExecutor {
                     //create Plot on Map
                     //wo?
                     //ausgangspunkt -> mitte 1. plot oder so
-                    //spiralenförmig rundherum
+                    //spiralen-förmig rundherum
                     // -> nächsten platz suchen
                     //plot platzieren -> für test concrete
                     //lily pads platzieren
@@ -94,7 +97,7 @@ public class PlotCommand implements CommandExecutor {
                     } else if (args[0].equalsIgnoreCase("delete")) {
                         PlotHandler plotHandler = new PlotHandler();
                         if (plotHandler.deletePlot(player, args[1])) {
-                            player.sendMessage(Data.getPrefix() + "§aDein Plot §6\"" + args[1] + "\" §awurde erfolgreich gelöscht!");
+                            player.sendMessage(Data.getPrefix() + "§aDein Plot §6\"" + args[1] + "\"§a wurde erfolgreich gelöscht!");
                         } else {
                             player.sendMessage(Data.getPrefix() + "§cDu besitzt keinen Plot namens §6\"" + args[1] + "\"§c!");
                         }
@@ -102,7 +105,16 @@ public class PlotCommand implements CommandExecutor {
                         Player target = Bukkit.getPlayer(args[1]);
                         if (target != null) {
                             new PlotHandler().listPlots(target);
+                        } else {
+                            player.sendMessage(Data.getPrefix() + "§cDer Spieler konnte nicht gefunden werden!");
                         }
+                    } else if (args[0].equalsIgnoreCase("setHome")) {
+                        PlotHandler plotHandler = new PlotHandler();
+                        PlotData plotData = plotHandler.getPlot(player, args[1]);
+                        plotHandler.setHome(plotData, player.getLocation());
+                        player.sendMessage(Data.getPrefix() + "§aDie neue Home-Location wurde erstellt. Du kannst sie mit §6/p home <PlotName>§a nutzen." );
+                    } else if (args[0].equalsIgnoreCase("home")) {
+                        new PlotHandler().teleportHome(args[1], player);
                     } else if (args[0].equalsIgnoreCase("root")) {
                         if (Math.isInt(args[1])) {
                             int number = Integer.parseInt(args[1]);
@@ -121,6 +133,25 @@ public class PlotCommand implements CommandExecutor {
                             player.sendMessage(Data.getPrefix() + "§cBitte verwende die Zahl 1 oder 2");
                         }
 
+                    } else if (args[0].equalsIgnoreCase("invite")) {
+                        PlotHandler plotHandler = new PlotHandler();
+                        if (target == null || plotData == null) {
+                            player.sendMessage(Data.getPrefix() + "§cDieser command ist nicht für den manuellen Gebrauch gedacht.");
+                            return false;
+                        }
+                        if (args[1].equalsIgnoreCase("accept")) {
+                            if (plotHandler.addToTrusted(plotData, target)) {
+                                target.sendMessage(Data.getPrefix() + "§aDu bist nun an dem Plot §6\"" + plotData.getName() + "\"§a von §6" + player.getName() + "§a beteiligt.");
+                            } else {
+                                target.sendMessage(Data.getPrefix() + "§cDu bist bereits an diesem Plot beteiligt.");
+
+                            }
+                        } else if (args[1].equalsIgnoreCase("deny")){
+                            for (int i = 0; i < 80; i++) {
+                                player.sendMessage("");
+                            }
+                        }
+
                     } else if (args[0].equalsIgnoreCase("help")) {
                         sendCommands(player);
                     } else {
@@ -137,14 +168,50 @@ public class PlotCommand implements CommandExecutor {
                                 player.sendMessage(Data.getPrefix() + ChatColor.GOLD + target.getName() + "§c besitzt keinen Plot namens §6\"" + args[1] + "\"§c!");
                             }
                         } else {
-                            player.sendMessage(Data.getPrefix() + "§cDer Spieler konnte nicht gefunden werden!");
+                            player.sendMessage(Data.getPrefix() + "§cDieser Spieler konnte nicht gefunden werden!");
                         }
                     } else if (args[0].equalsIgnoreCase("invite")) {
+                        Player localTarget = Bukkit.getPlayer(args[1]);
+                        PlotHandler plotHandler = new PlotHandler();
+                        PlotData localPlotData = plotHandler.getPlot(player, args[2]);
+                        if (localTarget != null) {
+                            if (localPlotData != null) {
+                                plotData = localPlotData;
+                                target = localTarget;
+                                player.sendMessage(Data.getPrefix() + "§aDer Spieler§6 " + target.getName() + "§a wurde eingeladen.");
+
+                                TextComponent baseText = new TextComponent(Data.getPrefix() + "§7Du wurdest auf den Plot von §6" + player.getName() + " §7eingeladen: ");
+
+                                TextComponent textAccept = new TextComponent("§a[annehmen] ");
+                                textAccept.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/p invite accept"));
+                                textAccept.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§a[annehmen]")));
+                                TextComponent textDeny = new TextComponent("§c[ablehnen]");
+                                textDeny.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/p invite deny"));
+                                textDeny.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextComponent.fromLegacyText("§c[ablehnen]")));
+
+                                baseText.addExtra(textAccept);
+                                baseText.addExtra(textDeny);
+                                target.spigot().sendMessage(baseText);
+                            } else {
+                                player.sendMessage(Data.getPrefix() + "§cDu besitzt keinen Plot mit diesem Namen.");
+                            }
+                        } else {
+                            player.sendMessage(Data.getPrefix() + "§cDieser Spieler konnte nicht gefunden werden.");
+                        }
+                    } else if (args[0].equalsIgnoreCase("remove")) {
                         Player target = Bukkit.getPlayer(args[1]);
+                        PlotHandler plotHandler = new PlotHandler();
+                        PlotData plotData = plotHandler.getPlot(player, args[2]);
                         if (target != null) {
-                            PlotHandler plotHandler = new PlotHandler();
-                            PlotData plotData = plotHandler.getPlot(player, args[2]);
-                            plotHandler.addToTrusted(plotData, target);
+                            if (plotData != null) {
+                                if (plotHandler.removeFromTrusted(plotData, target)) {
+                                    player.sendMessage(Data.getPrefix() + "§aDer Spieler§6 " + target.getName() + "§a wurde von diesem Plot entfernt.");
+                                } else {
+                                    player.sendMessage(Data.getPrefix() + "§cDer Spieler§6 " + target.getName() + "§c ist nicht an diesem Plot beteiligt.");
+                                }
+                            } else {
+                                player.sendMessage(Data.getPrefix() + "§cDu besitzt keinen Plot mit diesem Namen.");
+                            }
                         } else {
                             player.sendMessage(Data.getPrefix() + "§cDieser Spieler konnte nicht gefunden werden.");
                         }
@@ -169,7 +236,8 @@ public class PlotCommand implements CommandExecutor {
     private void sendCommands(Player player) {
         player.sendMessage(Data.getPrefix() + "§c/P create");
         player.sendMessage(Data.getPrefix() + "§c/P invite <Player>");
-        player.sendMessage(Data.getPrefix() + "§c/P remove");
+        player.sendMessage(Data.getPrefix() + "§c/P remove <Player>");
+        player.sendMessage(Data.getPrefix() + "§c/P delete <PlotName>");
         player.sendMessage(Data.getPrefix() + "§c/P home");
         player.sendMessage(Data.getPrefix() + "§c/P root");
     }

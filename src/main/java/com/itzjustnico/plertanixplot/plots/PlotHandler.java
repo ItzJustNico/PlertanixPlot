@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import redempt.redlib.multiblock.MultiBlockStructure;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -40,8 +41,10 @@ public class PlotHandler {
     }
 
     public void updatePlotJson(PlotData updatedPlotData) {
-        deletePlotJson(Bukkit.getPlayer(updatedPlotData.getOwner()), updatedPlotData.getName());
-        new PluginJsonWriter().writeDataToFile(updatedPlotData);
+        UUID randomUUID = UUID.randomUUID();
+        File writeToFile = new File(Main.getPlugin().getDataFolder() +  "/plots", updatedPlotData.getId() + ".json");
+        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, updatedPlotData.getId(), updatedPlotData.getOwner(), updatedPlotData.getTrustedPlayers(), updatedPlotData.getName(), updatedPlotData.getMinX(), updatedPlotData.getMaxX(), updatedPlotData.getMinZ(), updatedPlotData.getMaxZ(), updatedPlotData.getWaterY(), updatedPlotData.getHome()));
+
         if (plotData.containsKey(updatedPlotData.getId())) {
             plotData.remove(updatedPlotData.getId());
         }
@@ -66,7 +69,7 @@ public class PlotHandler {
         return isOccupied;
     }
 
-    //returns 2 Blocks if a plot has been found else an emtpy array
+    //returns 2 Blocks if a plot has been found else an empty array
     public Block[] getNextAvailablePlot() {
         Location root1 = (Location) Data.cfg.get("plots.root.1");
         Location root2 = (Location) Data.cfg.get("plots.root.2");
@@ -219,23 +222,39 @@ public class PlotHandler {
         }
     }
 
-    public void addToTrusted(PlotData plotData, Player trustedPlayer) {
+    public boolean addToTrusted(PlotData plotData, Player trustedPlayer) {
         if (plotData != null) {
             List<UUID> list = plotData.getTrustedPlayers();
-            list.add(trustedPlayer.getUniqueId());
-            plotData.setTrustedPlayers(list);
-            updatePlotJson(plotData);
-            Bukkit.getPlayer(plotData.getOwner()).sendMessage(Data.getPrefix() + "§aDer Spieler§6 " + trustedPlayer.getName() + "§a wurde eingeladen.");
+            if (!list.contains(trustedPlayer.getUniqueId())) {
+                list.add(trustedPlayer.getUniqueId());
+                plotData.setTrustedPlayers(list);
+                updatePlotJson(plotData);
+                return true;
+            }
         }
+        return false;
     }
 
-    public boolean checkBlockOnPlot(Player owner, Block block) {
+    public boolean removeFromTrusted(PlotData plotData, Player trustedPlayer) {
+        if (plotData != null) {
+            List<UUID> list = plotData.getTrustedPlayers();
+            if (list.contains(trustedPlayer.getUniqueId())) {
+                list.remove(trustedPlayer.getUniqueId());
+                plotData.setTrustedPlayers(list);
+                updatePlotJson(plotData);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkBlockOnPlot(Player player, Block block) {
         boolean blockBreakable = false;
         int blockX = block.getX();
         int blockY = block.getY();
         int blockZ = block.getZ();
         for (PlotData plotData : plotData.values()) {
-            if (plotData.getOwner().equals(owner.getUniqueId())) {
+            if (plotData.getOwner().equals(player.getUniqueId()) || plotData.getTrustedPlayers().contains(player)) {
                 if (blockX < plotData.getMaxX() && blockX > plotData.getMinX()) {
                     if (blockZ < plotData.getMaxZ() && blockZ > plotData.getMinZ()) {
                         if (blockY <= 320) {
@@ -248,13 +267,39 @@ public class PlotHandler {
         return blockBreakable;
     }
 
-    public PlotData getPlot(Player owner, String plotName) {
+    public PlotData getPlot(Player player, String plotName) {
         for (PlotData plotData : plotData.values()) {
-            if (plotData.getOwner().equals(owner.getUniqueId()) && plotData.getName().equals(plotName)) {
-                return plotData;
+            if (plotData.getOwner().equals(player.getUniqueId()) || plotData.getTrustedPlayers().contains(player)) {
+                if (plotData.getName().equals(plotName)) {
+                    return plotData;
+                }
             }
         }
         return null;
+    }
+
+    public boolean setHome(PlotData plotData, Location homeLocation) {
+        if (plotData != null) {
+            plotData.setHome(homeLocation);
+            updatePlotJson(plotData);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean teleportHome(String plotName, Player player) {
+        PlotData plotData = getPlot(player, plotName);
+        if (plotData != null) {
+            if (plotData.getHome() != null) {
+                player.teleport(plotData.getHome());
+                return true;
+            } else {
+                player.sendMessage(Data.getPrefix() + "§cDu musst die Home-Location zuerst mit §6/p setHome <PlotName>§c setzten.");
+            }
+        } else {
+            player.sendMessage(Data.getPrefix() + "§cDu hast keinen Plot mit diesem Namen.");
+        }
+        return false;
     }
 
     /**
@@ -284,8 +329,9 @@ public class PlotHandler {
         boolean deleteWorked = false;
         if (plotData != null) {
             File fileToDelete = new File(Main.getPlugin().getDataFolder() +  "/plots", plotData.getId() + ".json");
-            fileToDelete.delete();
-            deleteWorked = true;
+            if (fileToDelete.delete()) {
+                deleteWorked = true;
+            }
         }
         return deleteWorked;
     }
