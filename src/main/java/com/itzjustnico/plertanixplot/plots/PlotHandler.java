@@ -29,9 +29,11 @@ public class PlotHandler {
 
     public PlotHandler() {
         File directory = new File(Main.getPlugin().getDataFolder(), "/plots");
+        if (!directory.exists()) {
+            directory.mkdir();
+        }
         for (File file : directory.listFiles()) {
             final PlotData data = (PlotData) new PluginJsonWriter().getDataFromFile(file, PlotData.class);
-            System.out.println(data);
             plotData.putIfAbsent(data.getId(), data);
         }
     }
@@ -44,8 +46,11 @@ public class PlotHandler {
 
     public void updatePlotJson(PlotData updatedPlotData) {
         File writeToFile = new File(Main.getPlugin().getDataFolder() +  "/plots", updatedPlotData.getId() + ".json");
-        new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, updatedPlotData.getId(), updatedPlotData.getOwner(), updatedPlotData.getTrustedPlayers(), updatedPlotData.getName(), updatedPlotData.getMinX(), updatedPlotData.getMaxX(), updatedPlotData.getMinZ(), updatedPlotData.getMaxZ(), updatedPlotData.getWaterY(), updatedPlotData.getHomeLocation()));
-
+        if (updatedPlotData.getHomeLocation() != null) {
+            new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, updatedPlotData.getId(), updatedPlotData.getOwner(), updatedPlotData.getTrustedPlayers(), updatedPlotData.getName(), updatedPlotData.getMinX(), updatedPlotData.getMaxX(), updatedPlotData.getMinZ(), updatedPlotData.getMaxZ(), updatedPlotData.getWaterY(), updatedPlotData.getHomeLocation()));
+        } else {
+            new PluginJsonWriter().writeDataToFile(new PlotData(writeToFile, updatedPlotData.getId(), updatedPlotData.getOwner(), updatedPlotData.getTrustedPlayers(), updatedPlotData.getName(), updatedPlotData.getMinX(), updatedPlotData.getMaxX(), updatedPlotData.getMinZ(), updatedPlotData.getMaxZ(), updatedPlotData.getWaterY()));
+        }
         if (plotData.containsKey(updatedPlotData.getId())) {
             plotData.remove(updatedPlotData.getId());
         }
@@ -81,7 +86,7 @@ public class PlotHandler {
 
         boolean foundPlot = false;
         int maxRuns = 1;
-        int offset = 25;
+        int offset = (int) Data.cfg.get("plots.plotSideLength") + (int) Data.cfg.get("plots.blocksBetweenPlots");
         while (!foundPlot) {
 
             //x loop
@@ -112,7 +117,7 @@ public class PlotHandler {
 
             offset = offset*(-1);
             maxRuns++;
-            if (maxRuns == 5) {
+            if (maxRuns == 10) {
                 break;
             }
         }
@@ -151,8 +156,7 @@ public class PlotHandler {
             maxZ = block1.getZ();
         }
 
-        System.out.println(placeLocation);
-        int squareSize = 20;
+        int squareSize = (int) Data.cfg.get("plots.plotSideLength");
         placeLocation.getBlock().setType(material);
         for (int i = 1; i < squareSize; i++) {
             placeLocation.setX(placeLocation.getX() + 1);
@@ -179,7 +183,7 @@ public class PlotHandler {
     public void placeBoat(Block block1, Player player) {
         double middleLocX = (minX + (maxX - minX) / 2) -4;
         double middleLocZ = (minZ + (maxZ - minZ) / 2) -7;
-        Location middleLoc = new Location(player.getWorld(), middleLocX, block1.getY(), middleLocZ);
+        Location middleLoc = new Location(player.getWorld(), middleLocX, block1.getY() - 1, middleLocZ);
         MultiBlockStructure.create(Main.getPlugin().getResource("plotBoat.dat"), "plotBoat").build(middleLoc);
     }
 
@@ -213,14 +217,17 @@ public class PlotHandler {
         return hasPlot;
     }
 
-    public void listPlots(Player player) {
-        player.sendMessage("§7§l---------§r§6Plots-" + player.getName() + "§7§l---------");
-
-        for (PlotData plotData : plotData.values()) {
-            if (plotData.getOwner().equals(player.getUniqueId())) {
-                player.sendMessage("§7 - §6" + plotData.getName());
+    public boolean listPlots(Player player) {
+        if (hasPlot(player)) {
+            player.sendMessage("§8§l---------§r§6 Plots §8§l---------");
+            for (PlotData plotData : plotData.values()) {
+                if (plotData.getOwner().equals(player.getUniqueId())) {
+                    player.sendMessage("§7 - §e" + plotData.getName());
+                }
             }
+            return true;
         }
+        return false;
     }
 
     public boolean addToTrusted(PlotData plotData, Player trustedPlayer) {
@@ -297,9 +304,13 @@ public class PlotHandler {
 
     public boolean setHome(PlotData plotData, Location homeLocation) {
         if (plotData != null) {
-            plotData.setHomeLocation(homeLocation);
-            updatePlotJson(plotData);
-            return true;
+            if (homeLocation.getBlock().getX() > plotData.getMinX() && homeLocation.getBlock().getX() < plotData.getMaxX()) {
+                if (homeLocation.getBlock().getZ() > plotData.getMinZ() && homeLocation.getBlock().getZ() < plotData.getMaxZ()) {
+                    plotData.setHomeLocation(homeLocation);
+                    updatePlotJson(plotData);
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -368,12 +379,17 @@ public class PlotHandler {
             int zMax = plotData.getMaxZ();
             int zMin = plotData.getMinZ();
             int yMax = 320;
-            int yMin = plotData.getWaterY() + 1;
-            for (int x = xMin; x <= xMax; x++) {
-                for (int z = zMin; z <= zMax; z++) {
-                    for (int y = yMin; y <= yMax; y++) {
+            int yMin = plotData.getWaterY();
+            for (int x = xMax; x >= xMin; x--) {
+                for (int z = zMax; z >= zMin; z--) {
+                    for (int y = yMax; y >= yMin; y--) {
                         Location location = new Location(plotOwner.getWorld(), x, y, z);
-                        location.getBlock().setType(Material.AIR);
+                        if (y == plotData.getWaterY()) {
+                            location.getBlock().setType(Material.WATER);
+                        } else {
+                            location.getBlock().setType(Material.AIR, false);
+                        }
+
                     }
                 }
             }
@@ -382,10 +398,6 @@ public class PlotHandler {
             }
         }
         return deleteWorked;
-    }
-
-    public HashMap<UUID, PlotData> getPlotData() {
-        return plotData;
     }
 
     public int getMinX() {

@@ -46,6 +46,19 @@ public class PlotData extends JsonDataFile {
         this.trustedPlayers = new ArrayList<>();
     }
 
+    public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY) {
+        super(file);
+        this.id = id.toString();
+        this.owner = owner.toString();
+        this.name = plotName;
+        this.maxX = maxX;
+        this.minX = minX;
+        this.minZ = minZ;
+        this.maxZ = maxZ;
+        this.waterY = waterY;
+        this.trustedPlayers = trustedPlayers;
+    }
+
     public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY, Location homeLocation) {
         super(file);
         this.id = id.toString();
@@ -115,7 +128,11 @@ public class PlotData extends JsonDataFile {
     }
 
     public Location getHomeLocation() {
-        return new Location(Bukkit.getWorld(homeWorldName), homeX, homeY, homeZ, homeYaw, homePitch);
+        if (homeWorldName != null && homeX != 0 && homeY != 0 && homeZ != 0 && homeYaw != 0 && homePitch != 0) {
+            Location location = new Location(Bukkit.getWorld(homeWorldName), homeX, homeY, homeZ, homeYaw, homePitch);
+            return location;
+        }
+        return null;
     }
 
     public void setHomeLocation(Location homeLocation) {

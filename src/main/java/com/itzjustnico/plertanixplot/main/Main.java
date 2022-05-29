@@ -21,8 +21,14 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        //100x100
-        //10 blöcke abstand
+        /*
+        TODO: Hinteleportieren -> eventuell home standard mäßig setzten
+        TODO: Invites
+        TODO: Deletes
+        TODO: Info gesetzt datum
+        TODO: Zuletzt online
+         */
+
 
         plugin = this;
 
