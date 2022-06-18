@@ -18,6 +18,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -53,7 +54,7 @@ public class PlotCommand implements CommandExecutor {
                     if (args[0].equalsIgnoreCase("info")) {
                         PlotHandler plotHandler = new PlotHandler();
                         PlotData plotData = plotHandler.getPlotFromBlock(player.getLocation().getBlock().getRelative(BlockFace.DOWN));
-                        if (plotData != null) {
+                        if (plotData != null && Bukkit.getPlayer(plotData.getOwner()) != null) {
                             player.sendMessage("§f§l--------§r§6 Grundstücksinfo §f§l--------");
                             player.sendMessage("§7Owner: §e" + Bukkit.getPlayer(plotData.getOwner()).getName());
                             player.sendMessage("§7Name: §e" + plotData.getName());
@@ -72,6 +73,9 @@ public class PlotCommand implements CommandExecutor {
                                 message += "§7Niemand";
                             }
                             player.sendMessage(message);
+                            SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm a");
+                            //String date = sdf.format((long) plotData.getCreatedAT());
+                            //player.sendMessage("§7Erstellt: §e" + date);
                             player.sendMessage("§f§l---------§r§6 PlertanixPlot §f§l---------");
 
                         } else {
@@ -98,6 +102,11 @@ public class PlotCommand implements CommandExecutor {
                                             if (plotHandler.placePlotOnNextAvailable(Material.LILY_PAD, player)) {
                                                 //create Plot json
                                                 new PlotHandler().createPlotJson(player.getUniqueId(), args[1], plotHandler.getMinX(), plotHandler.getMaxX(), plotHandler.getMinZ(), plotHandler.getMaxZ(), plotHandler.getWaterY());
+                                                PlotData plotData = new PlotHandler().getPlot(player, args[1]);
+                                                if (plotData != null) {
+                                                    player.teleport(plotData.getHomeLocation());
+                                                    System.out.println(plotData.getHomeLocation());
+                                                }
                                                 Bukkit.getConsoleSender().sendMessage(Data.getPrefix() + ChatColor.GREEN + "A new Plot has been created!");
                                             }
                                         } else {

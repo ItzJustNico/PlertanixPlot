@@ -22,9 +22,9 @@ public final class Main extends JavaPlugin {
     public void onEnable() {
 
         /*
-        TODO: Hinteleportieren -> eventuell home standard mäßig setzten
+        TODO: Hinteleportieren -> eventuell home standard mäßig setzten DONE
         TODO: Invites
-        TODO: Deletes
+        TODO: Deletes       DONE
         TODO: Info gesetzt datum
         TODO: Zuletzt online
          */

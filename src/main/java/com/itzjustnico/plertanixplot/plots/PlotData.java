@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,12 +26,14 @@ public class PlotData extends JsonDataFile {
     private int maxZ;
     private int waterY;
 
-    private int homeX;
-    private int homeY;
-    private int homeZ;
+    private transient Location homeLocation;
+    private double homeX;
+    private double homeY;
+    private double homeZ;
     private float homeYaw;
     private float homePitch;
     private String homeWorldName;
+    private String createdAT;
 
 
     public PlotData(File file, UUID id, UUID owner, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY) {
@@ -44,6 +47,17 @@ public class PlotData extends JsonDataFile {
         this.maxZ = maxZ;
         this.waterY = waterY;
         this.trustedPlayers = new ArrayList<>();
+
+        double middleLocX = (minX + (maxX - minX) / 2) + 0.5;
+        double middleLocZ = (minZ + (maxZ - minZ) / 2) + 4.5;
+        this.homeLocation = new Location(Bukkit.getPlayer(owner).getWorld(), middleLocX, waterY + 1, middleLocZ, -180, 1);
+        this.homeX = homeLocation.getX();
+        this.homeY = homeLocation.getY();
+        this.homeZ = homeLocation.getZ();
+        this.homeYaw = homeLocation.getYaw();
+        this.homePitch = homeLocation.getPitch();
+        this.homeWorldName = homeLocation.getWorld().getName();
+        this.createdAT = new Date().toString();
     }
 
     public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY) {
@@ -57,6 +71,17 @@ public class PlotData extends JsonDataFile {
         this.maxZ = maxZ;
         this.waterY = waterY;
         this.trustedPlayers = trustedPlayers;
+
+        double middleLocX = (minX + (maxX - minX) / 2) + 0.5;
+        double middleLocZ = (minZ + (maxZ - minZ) / 2) + 4.5;
+        this.homeLocation = new Location(Bukkit.getPlayer(owner).getWorld(), middleLocX, waterY + 1, middleLocZ, -180, 1);
+        this.homeX = homeLocation.getX();
+        this.homeY = homeLocation.getY();
+        this.homeZ = homeLocation.getZ();
+        this.homeYaw = homeLocation.getYaw();
+        this.homePitch = homeLocation.getPitch();
+        this.homeWorldName = homeLocation.getWorld().getName();
+        this.createdAT = new Date().toString();
     }
 
     public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY, Location homeLocation) {
@@ -70,13 +95,16 @@ public class PlotData extends JsonDataFile {
         this.maxZ = maxZ;
         this.waterY = waterY;
         this.trustedPlayers = trustedPlayers;
+        this.trustedPlayers = new ArrayList<>();
 
-        this.homeX = homeLocation.getBlockX();
-        this.homeY = homeLocation.getBlockY();
-        this.homeZ = homeLocation.getBlockZ();
+        this.homeLocation = homeLocation;
+        this.homeX = homeLocation.getX();
+        this.homeY = homeLocation.getY();
+        this.homeZ = homeLocation.getZ();
         this.homeYaw = homeLocation.getYaw();
         this.homePitch = homeLocation.getPitch();
         this.homeWorldName = homeLocation.getWorld().getName();
+        this.createdAT = new Date().toString();
     }
 
     public PlotData(URI fileUri) {
@@ -125,6 +153,10 @@ public class PlotData extends JsonDataFile {
 
     public float getHomeYaw() {
         return homeYaw;
+    }
+
+    public String getCreatedAT() {
+        return createdAT;
     }
 
     public Location getHomeLocation() {

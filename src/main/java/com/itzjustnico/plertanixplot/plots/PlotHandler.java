@@ -121,6 +121,7 @@ public class PlotHandler {
                 break;
             }
         }
+
         return blocks;
     }
 
@@ -146,6 +147,7 @@ public class PlotHandler {
             minX = block2.getX();
             maxX = block1.getX();
         }
+        System.out.println(maxX);
         if (block1.getZ() < block2.getZ()) {
             placeLocation.setZ(block1.getZ());
             minZ = block1.getZ();
