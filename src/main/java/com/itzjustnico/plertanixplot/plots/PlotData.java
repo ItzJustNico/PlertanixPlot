@@ -57,7 +57,7 @@ public class PlotData extends JsonDataFile {
         this.homeYaw = homeLocation.getYaw();
         this.homePitch = homeLocation.getPitch();
         this.homeWorldName = homeLocation.getWorld().getName();
-        this.createdAT = new Date().toString();
+        this.createdAT = String.valueOf(new Date().getTime());
     }
 
     public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY) {
@@ -81,7 +81,7 @@ public class PlotData extends JsonDataFile {
         this.homeYaw = homeLocation.getYaw();
         this.homePitch = homeLocation.getPitch();
         this.homeWorldName = homeLocation.getWorld().getName();
-        this.createdAT = new Date().toString();
+        this.createdAT = String.valueOf(new Date().getTime());
     }
 
     public PlotData(File file, UUID id, UUID owner, List<UUID> trustedPlayers, String plotName, int minX, int maxX, int minZ, int maxZ, int waterY, Location homeLocation) {
@@ -95,7 +95,6 @@ public class PlotData extends JsonDataFile {
         this.maxZ = maxZ;
         this.waterY = waterY;
         this.trustedPlayers = trustedPlayers;
-        this.trustedPlayers = new ArrayList<>();
 
         this.homeLocation = homeLocation;
         this.homeX = homeLocation.getX();
@@ -104,7 +103,7 @@ public class PlotData extends JsonDataFile {
         this.homeYaw = homeLocation.getYaw();
         this.homePitch = homeLocation.getPitch();
         this.homeWorldName = homeLocation.getWorld().getName();
-        this.createdAT = new Date().toString();
+        this.createdAT = String.valueOf(new Date().getTime());
     }
 
     public PlotData(URI fileUri) {

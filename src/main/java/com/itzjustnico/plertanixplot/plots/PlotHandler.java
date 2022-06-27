@@ -235,9 +235,12 @@ public class PlotHandler {
     public boolean addToTrusted(PlotData plotData, Player trustedPlayer) {
         if (plotData != null) {
             List<UUID> list = plotData.getTrustedPlayers();
+            System.out.println(list);
             if (!list.contains(trustedPlayer.getUniqueId())) {
                 list.add(trustedPlayer.getUniqueId());
                 plotData.setTrustedPlayers(list);
+                System.out.println(list);
+                System.out.println(plotData.getTrustedPlayers());
                 updatePlotJson(plotData);
                 return true;
             }

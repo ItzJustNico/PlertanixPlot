@@ -11,8 +11,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-
 public final class Main extends JavaPlugin {
 
     private static Main plugin;

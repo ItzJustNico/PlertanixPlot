@@ -19,14 +19,11 @@ import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class PlotCommand implements CommandExecutor {
 
-    private PlotData plotData;
-    private Player target;
+    private HashMap<UUID, PlotData> invitedPlayers = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -73,9 +70,10 @@ public class PlotCommand implements CommandExecutor {
                                 message += "§7Niemand";
                             }
                             player.sendMessage(message);
-                            SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy 'at' h:mm a");
-                            //String date = sdf.format((long) plotData.getCreatedAT());
-                            //player.sendMessage("§7Erstellt: §e" + date);
+                            Date createdAT = new Date(Long.parseLong(plotData.getCreatedAT()));
+                            SimpleDateFormat sdf = new SimpleDateFormat("d'.' MMMM yyyy");
+                            String date = sdf.format(createdAT.getTime());
+                            player.sendMessage("§7Erstellt: §e" + date);
                             player.sendMessage("§f§l---------§r§6 PlertanixPlot §f§l---------");
 
                         } else {
@@ -188,21 +186,24 @@ public class PlotCommand implements CommandExecutor {
 
                     } else if (args[0].equalsIgnoreCase("invite")) {
                         if (args[1].equalsIgnoreCase("accept") || args[1].equalsIgnoreCase("deny")) {
-                            if (target == null || plotData == null) {
+                            if (!invitedPlayers.containsKey(player.getUniqueId())) {
                                 player.sendMessage(Data.getPrefix() + "§cDieser command ist nicht für den manuellen Gebrauch gedacht.");
                                 return false;
                             }
+                            PlotData plotData = invitedPlayers.get(player.getUniqueId());
                             if (args[1].equalsIgnoreCase("accept")) {
                                 PlotHandler plotHandler = new PlotHandler();
-                                if (plotHandler.addToTrusted(plotData, target)) {
-                                    target.sendMessage(Data.getPrefix() + "§aDu bist nun an dem Plot §6\"" + plotData.getName() + "\"§a von §6" + player.getName() + "§a beteiligt.");
+                                if (plotHandler.addToTrusted(plotData, player)) {
+                                    player.sendMessage(Data.getPrefix() + "§aDu bist nun an dem Plot §6\"" + plotData.getName() + "\"§a von §6" + player.getName() + "§a beteiligt.");
                                 } else {
-                                    target.sendMessage(Data.getPrefix() + "§cDu bist bereits an diesem Plot beteiligt.");
+                                    player.sendMessage(Data.getPrefix() + "§cDu bist bereits an diesem Plot beteiligt.");
                                 }
+                                invitedPlayers.remove(player.getUniqueId(), plotData);
                             } else if (args[1].equalsIgnoreCase("deny")) {
                                 for (int i = 0; i < 100; i++) {
                                     player.sendMessage("");
                                 }
+                                invitedPlayers.remove(player.getUniqueId(), plotData);
                             }
                         } else {
                             sendHelp(player);
@@ -227,14 +228,13 @@ public class PlotCommand implements CommandExecutor {
                             player.sendMessage(Data.getPrefix() + "§cDieser Spieler konnte nicht gefunden werden!");
                         }
                     } else if (args[0].equalsIgnoreCase("invite")) {
-                        Player localTarget = Bukkit.getPlayer(args[1]);
+                        Player target = Bukkit.getPlayer(args[1]);
                         PlotHandler plotHandler = new PlotHandler();
-                        PlotData localPlotData = plotHandler.getPlot(player, args[2]);
-                        if (localTarget != null) {
-                            if (localPlotData != null) {
-                                if (!localPlotData.getTrustedPlayers().contains(localTarget.getUniqueId())) {
-                                    plotData = localPlotData;
-                                    target = localTarget;
+                        PlotData plotData = plotHandler.getPlot(player, args[2]);
+                        if (target != null) {
+                            if (plotData != null) {
+                                if (!plotData.getTrustedPlayers().contains(target.getUniqueId())) {
+                                    invitedPlayers.put(target.getUniqueId(), plotData);
                                     player.sendMessage(Data.getPrefix() + "§aDer Spieler§6 " + target.getName() + "§a wurde eingeladen.");
 
                                     TextComponent baseText = new TextComponent(Data.getPrefix() + "§7Du wurdest auf den Plot von §6" + player.getName() + " §7eingeladen: ");
