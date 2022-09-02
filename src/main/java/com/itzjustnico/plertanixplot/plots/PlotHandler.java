@@ -4,12 +4,18 @@ import com.google.gson.TypeAdapter;
 import com.itzjustnico.plertanixplot.json.PluginJsonWriter;
 import com.itzjustnico.plertanixplot.main.Main;
 import com.itzjustnico.plertanixplot.storage.Data;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Sign;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import redempt.redlib.multiblock.MultiBlockStructure;
 
 import java.io.File;
@@ -75,6 +81,45 @@ public class PlotHandler {
         return isOccupied;
     }
 
+    private boolean isPlotFree(Location block1, Location block2) {
+        double yMax = 200;
+        double yMin = block1.getY();
+        double xMin;
+        double xMax;
+        double zMin;
+        double zMax;
+
+        if (block1.getX() < block2.getX()) {
+            xMin = block1.getX();
+            xMax = block2.getX();
+        } else {
+            xMin = block2.getX();
+            xMax = block1.getX();
+        }
+        if (block1.getZ() < block2.getZ()) {
+            zMin = block1.getZ();
+            zMax = block2.getZ();
+        } else {
+            zMin = block2.getZ();
+            zMax = block1.getZ();
+        }
+
+            for (double x = xMax; x >= xMin; x--) {
+                for (double z = zMax; z >= zMin; z--) {
+                    for (double y = yMax; y >= yMin; y--) {
+                        Location location = new Location(Bukkit.getWorld("world"), x, y, z);
+                        if (location.getBlock().getType() != Material.AIR) {
+                            System.out.println(location);
+                            System.out.println(location.getBlock().getType());
+                            return false;
+                        }
+                    }
+                }
+            }
+
+        return true;
+    }
+
     //returns 2 Blocks if a plot has been found else an empty array
     public Block[] getNextAvailablePlot() {
         Location root1 = (Location) Data.cfg.get("plots.root.1");
@@ -94,10 +139,12 @@ public class PlotHandler {
                 plotBlock1.setX(plotBlock1.getX() + offset);
                 plotBlock2.setX(plotBlock2.getX() + offset);
                 if (!blockOccupied(plotBlock1.getBlock())) {
-                    blocks[0] = plotBlock1.getBlock();
-                    blocks[1] = plotBlock2.getBlock();
-                    foundPlot = true;
-                    break;
+                    if (isPlotFree(plotBlock1, plotBlock2)) {
+                        blocks[0] = plotBlock1.getBlock();
+                        blocks[1] = plotBlock2.getBlock();
+                        foundPlot = true;
+                        break;
+                    }
                 }
             }
 
@@ -107,10 +154,12 @@ public class PlotHandler {
                     plotBlock1.setZ(plotBlock1.getZ() - offset);
                     plotBlock2.setZ(plotBlock2.getZ() - offset);
                     if (!blockOccupied(plotBlock1.getBlock())) {
-                        blocks[0] = plotBlock1.getBlock();
-                        blocks[1] = plotBlock2.getBlock();
-                        foundPlot = true;
-                        break;
+                        if (isPlotFree(plotBlock1, plotBlock2)) {
+                            blocks[0] = plotBlock1.getBlock();
+                            blocks[1] = plotBlock2.getBlock();
+                            foundPlot = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -187,6 +236,45 @@ public class PlotHandler {
         double middleLocZ = (minZ + (maxZ - minZ) / 2) -7;
         Location middleLoc = new Location(player.getWorld(), middleLocX, block1.getY() - 1, middleLocZ);
         MultiBlockStructure.create(Main.getPlugin().getResource("plotBoat.dat"), "plotBoat").build(middleLoc);
+        middleLoc.getBlock().setType(Material.GREEN_CONCRETE);
+        Location chestLoc = new Location(player.getWorld(), middleLocX + 4, middleLoc.getBlockY() + 1, middleLocZ + 9);
+        Chest chest = (Chest) chestLoc.getBlock().getState();
+        chest.setCustomName("§9Starterkiste");
+        chest.getBlockInventory().setItem(0, new ItemStack(Material.FISHING_ROD));
+        chest.getBlockInventory().setItem(1, new ItemStack(Material.STONE_SHOVEL));
+        chest.getBlockInventory().setItem(2, new ItemStack(Material.STONE_PICKAXE));
+        chest.getBlockInventory().setItem(3, new ItemStack(Material.STONE_AXE));
+        chest.getBlockInventory().setItem(4, new ItemStack(Material.STONE_HOE));
+        chest.getBlockInventory().setItem(5, new ItemStack(Material.COMPASS));
+        chest.getBlockInventory().setItem(6, new ItemStack(Material.LILY_PAD,5));
+        chest.getBlockInventory().setItem(7, new ItemStack(Material.BIRCH_SAPLING, 2));
+        chest.getBlockInventory().setItem(8, new ItemStack(Material.OAK_SAPLING, 2));
+        chest.getBlockInventory().setItem(9, new ItemStack(Material.SPYGLASS));
+        chest.getBlockInventory().setItem(11, new ItemStack(Material.STICK, 6));
+        chest.getBlockInventory().setItem(12, new ItemStack(Material.OAK_BOAT));
+        ItemStack potion = new ItemStack(Material.POTION);
+        PotionMeta meta = (PotionMeta)potion.getItemMeta();
+        meta.setColor(Color.BLUE);
+        meta.addCustomEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 180 * 20, 0), true);
+        meta.setDisplayName("§9Potion of Water Breathing");
+        potion.setItemMeta((ItemMeta)meta);
+
+        chest.getBlockInventory().setItem(14, potion);
+        chest.getBlockInventory().setItem(16, new ItemStack(Material.GRASS_BLOCK, 4));
+        chest.getBlockInventory().setItem(17, new ItemStack(Material.DIRT, 4));
+        chest.getBlockInventory().setItem(18, new ItemStack(Material.BONE, 5));
+        chest.getBlockInventory().setItem(19, new ItemStack(Material.COAL, 4));
+        chest.getBlockInventory().setItem(21, new ItemStack(Material.WHEAT_SEEDS, 2));
+        chest.getBlockInventory().setItem(22, new ItemStack(Material.BREAD));
+        chest.getBlockInventory().setItem(23, new ItemStack(Material.SALMON, 2));
+        chest.getBlockInventory().setItem(24, new ItemStack(Material.APPLE, 2));
+        chest.getBlockInventory().setItem(26, new ItemStack(Material.TORCH, 6));
+        Location signLoc = new Location(player.getWorld(), chestLoc.getBlockX(), chestLoc.getBlockY() + 1, chestLoc.getBlockZ());
+        signLoc.getBlock().setType(Material.AIR);
+        //Sign sign = (Sign) signLoc.getBlock().getState();
+
+        //signLoc.getBlock().getRelative(BlockFace.WEST).setType(Material.OAK_WALL_SIGN);
+
     }
 
     public int getPlotAmount(Player player) {
