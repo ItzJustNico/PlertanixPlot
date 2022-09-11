@@ -109,8 +109,7 @@ public class PlotHandler {
                     for (double y = yMax; y >= yMin; y--) {
                         Location location = new Location(Bukkit.getWorld("world"), x, y, z);
                         if (location.getBlock().getType() != Material.AIR) {
-                            System.out.println(location);
-                            System.out.println(location.getBlock().getType());
+                            System.out.println("Block in the way" + location);
                             return false;
                         }
                     }
@@ -126,6 +125,9 @@ public class PlotHandler {
         Location root2 = (Location) Data.cfg.get("plots.root.2");
         Location plotBlock1 = root1.clone();
         Location plotBlock2 = root2.clone();
+        System.out.println("root" + plotBlock1);
+        System.out.println("root" + plotBlock2);
+
 
         Block[] blocks = new Block[2];
 
@@ -138,13 +140,21 @@ public class PlotHandler {
             for (int i = 0; i < maxRuns; i++) {
                 plotBlock1.setX(plotBlock1.getX() + offset);
                 plotBlock2.setX(plotBlock2.getX() + offset);
+                System.out.println(plotBlock1);
+                System.out.println(plotBlock2);
                 if (!blockOccupied(plotBlock1.getBlock())) {
-                    if (isPlotFree(plotBlock1, plotBlock2)) {
+                   if (isPlotFree(plotBlock1, plotBlock2)) {
                         blocks[0] = plotBlock1.getBlock();
                         blocks[1] = plotBlock2.getBlock();
                         foundPlot = true;
                         break;
                     }
+
+                       /* blocks[0] = plotBlock1.getBlock();
+                        blocks[1] = plotBlock2.getBlock();
+                        foundPlot = true;
+                        break;*/
+
                 }
             }
 
@@ -160,13 +170,21 @@ public class PlotHandler {
                             foundPlot = true;
                             break;
                         }
+
+                           /* blocks[0] = plotBlock1.getBlock();
+                            blocks[1] = plotBlock2.getBlock();
+                            foundPlot = true;
+                            break;*/
+
                     }
                 }
             }
 
             offset = offset*(-1);
             maxRuns++;
+            System.out.println(maxRuns);
             if (maxRuns == 10) {
+                System.out.println("break");
                 break;
             }
         }
@@ -236,7 +254,6 @@ public class PlotHandler {
         double middleLocZ = (minZ + (maxZ - minZ) / 2) -7;
         Location middleLoc = new Location(player.getWorld(), middleLocX, block1.getY() - 1, middleLocZ);
         MultiBlockStructure.create(Main.getPlugin().getResource("plotBoat.dat"), "plotBoat").build(middleLoc);
-        middleLoc.getBlock().setType(Material.GREEN_CONCRETE);
         Location chestLoc = new Location(player.getWorld(), middleLocX + 4, middleLoc.getBlockY() + 1, middleLocZ + 9);
         Chest chest = (Chest) chestLoc.getBlock().getState();
         chest.setCustomName("§9Starterkiste");
