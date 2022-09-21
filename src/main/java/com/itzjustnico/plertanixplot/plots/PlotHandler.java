@@ -107,15 +107,14 @@ public class PlotHandler {
             for (double x = xMax; x >= xMin; x--) {
                 for (double z = zMax; z >= zMin; z--) {
                     for (double y = yMax; y >= yMin; y--) {
-                        Location location = new Location(Bukkit.getWorld("world"), x, y, z);
-                        if (location.getBlock().getType() != Material.AIR) {
-                            System.out.println("Block in the way" + location);
+                        Location location = (Location) block1.getWorld();
+                        if (!location.getBlock().getType().isAir()) {
+                            System.out.println("Block in the way, loc: " + location);
                             return false;
                         }
                     }
                 }
             }
-
         return true;
     }
 
@@ -149,12 +148,6 @@ public class PlotHandler {
                         foundPlot = true;
                         break;
                     }
-
-                       /* blocks[0] = plotBlock1.getBlock();
-                        blocks[1] = plotBlock2.getBlock();
-                        foundPlot = true;
-                        break;*/
-
                 }
             }
 
@@ -170,12 +163,6 @@ public class PlotHandler {
                             foundPlot = true;
                             break;
                         }
-
-                           /* blocks[0] = plotBlock1.getBlock();
-                            blocks[1] = plotBlock2.getBlock();
-                            foundPlot = true;
-                            break;*/
-
                     }
                 }
             }
