@@ -10,10 +10,10 @@ public class ConfigManager {
         }
 
         if (Data.cfg.get("plots.plotSideLength") == null) {
-            Data.cfg.set("plots.plotSideLength", 0);
+            Data.cfg.set("plots.plotSideLength", 98);
         }
         if (Data.cfg.get("plots.blocksBetweenPlots") == null) {
-            Data.cfg.set("plots.blocksBetweenPlots", 0);
+            Data.cfg.set("plots.blocksBetweenPlots", 5);
         }
 
         try {

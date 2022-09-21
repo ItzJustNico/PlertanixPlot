@@ -15,15 +15,6 @@ public class Data {
     private static final String noPlayer = "§cDiesen Command dürfen nur Spieler ausführen";
     private static final String prefix = "§7[§6Plertanix§7] ";
 
-    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
-        for (Map.Entry<T, E> entry : map.entrySet()) {
-            if (Objects.equals(value, entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
     public static String getNoPermission() {
         return noPermission;
     }

@@ -107,7 +107,7 @@ public class PlotHandler {
             for (double x = xMax; x >= xMin; x--) {
                 for (double z = zMax; z >= zMin; z--) {
                     for (double y = yMax; y >= yMin; y--) {
-                        Location location = (Location) block1.getWorld();
+                        Location location = new Location(block1.getWorld(), x, y, z);
                         if (!location.getBlock().getType().isAir()) {
                             System.out.println("Block in the way, loc: " + location);
                             return false;
