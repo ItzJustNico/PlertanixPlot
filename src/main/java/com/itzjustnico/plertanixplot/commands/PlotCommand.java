@@ -1,9 +1,11 @@
 package com.itzjustnico.plertanixplot.commands;
 
+import com.itzjustnico.plertanixplot.main.Main;
 import com.itzjustnico.plertanixplot.plots.PlotData;
 import com.itzjustnico.plertanixplot.plots.PlotHandler;
 import com.itzjustnico.plertanixplot.storage.Data;
 import com.itzjustnico.plertanixplot.storage.Math;
+
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -16,6 +18,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginDescriptionFile;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -83,6 +86,9 @@ public class PlotCommand implements CommandExecutor {
                         if (!new PlotHandler().listPlots(player)) {
                             player.sendMessage(Data.getPrefix() + "§cDu hast noch keinen Plot.");
                         }
+                    } else if (args[0].equalsIgnoreCase("version")) {
+
+                        player.sendMessage(Data.getPrefix() + "§6" + Main.getPlugin().getPluginDescriptionFile().getVersion());
                     } else if (args[0].equalsIgnoreCase("help")) {
                         sendCommands(player);
                     } else {

@@ -8,6 +8,7 @@ import com.itzjustnico.plertanixplot.listener.BlockPlaceListener;
 import com.itzjustnico.plertanixplot.storage.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,6 +16,7 @@ public final class Main extends JavaPlugin {
 
     private static Main plugin;
     private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private PluginDescriptionFile pluginDescriptionFile;
 
     @Override
     public void onEnable() {
@@ -30,6 +32,7 @@ public final class Main extends JavaPlugin {
 
         plugin = this;
 
+        pluginDescriptionFile = getDescription();
         listenerRegistration();
         registerCommands();
         new ConfigManager().registerConfig();
@@ -59,5 +62,9 @@ public final class Main extends JavaPlugin {
     }
     public static Main getPlugin() {
         return plugin;
+    }
+
+    public PluginDescriptionFile getPluginDescriptionFile() {
+        return pluginDescriptionFile;
     }
 }
