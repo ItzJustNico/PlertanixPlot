@@ -354,22 +354,11 @@ public class PlotHandler {
     }
 
     public boolean checkBlockOnPlotBreakable(Player player, Block block) {
-        boolean blockBreakable = false;
-        int blockX = block.getX();
-        int blockY = block.getY();
-        int blockZ = block.getZ();
-        for (PlotData plotData : plotData.values()) {
-            if (plotData.getOwner().equals(player.getUniqueId()) || plotData.getTrustedPlayers().contains(player)) {
-                if (blockX < plotData.getMaxX() && blockX > plotData.getMinX()) {
-                    if (blockZ < plotData.getMaxZ() && blockZ > plotData.getMinZ()) {
-                        if (blockY <= 320) {
-                            blockBreakable = true;
-                        }
-                    }
-                }
-            }
+        PlotData plotData = getPlotFromBlock(block);
+        if (plotData.getOwner().equals(player.getUniqueId()) || plotData.getTrustedPlayers().contains(player.getUniqueId())) {
+            return true;
         }
-        return blockBreakable;
+        return false;
     }
 
     public PlotData getPlot(Player player, String plotName) {

@@ -21,14 +21,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        /*
-        TODO: Hinteleportieren -> eventuell home standard mäßig setzten DONE
-        TODO: Invites
-        TODO: Deletes       DONE
-        TODO: Info gesetzt datum
-        TODO: Zuletzt online
-         */
-
+        //andere plots interactions
 
         plugin = this;
 
@@ -40,7 +33,6 @@ public final class Main extends JavaPlugin {
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "==================================================================");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "PlertanixPlot wurde erfolgreich gestartet!");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "==================================================================");
-
     }
 
     @Override

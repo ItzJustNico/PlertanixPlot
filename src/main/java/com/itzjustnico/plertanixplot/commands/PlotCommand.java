@@ -87,8 +87,11 @@ public class PlotCommand implements CommandExecutor {
                             player.sendMessage(Data.getPrefix() + "§cDu hast noch keinen Plot.");
                         }
                     } else if (args[0].equalsIgnoreCase("version")) {
-
-                        player.sendMessage(Data.getPrefix() + "§6" + Main.getPlugin().getPluginDescriptionFile().getVersion());
+                        if (player.hasPermission("version")) {
+                            player.sendMessage(Data.getPrefix() + "§6" + Main.getPlugin().getPluginDescriptionFile().getVersion());
+                        } else {
+                            player.sendMessage(Data.getPrefix() + Data.getNoPermission());
+                        }
                     } else if (args[0].equalsIgnoreCase("help")) {
                         sendCommands(player);
                     } else {
@@ -109,7 +112,6 @@ public class PlotCommand implements CommandExecutor {
                                                 PlotData plotData = new PlotHandler().getPlot(player, args[1]);
                                                 if (plotData != null) {
                                                     player.teleport(plotData.getHomeLocation());
-                                                    System.out.println(plotData.getHomeLocation());
                                                 }
                                                 Bukkit.getConsoleSender().sendMessage(Data.getPrefix() + ChatColor.GREEN + "A new Plot has been created!");
                                             }
@@ -173,21 +175,25 @@ public class PlotCommand implements CommandExecutor {
                     } else if (args[0].equalsIgnoreCase("home")) {
                         new PlotHandler().teleportHome(args[1], player);
                     } else if (args[0].equalsIgnoreCase("root")) {
-                        if (Math.isInt(args[1])) {
-                            int number = Integer.parseInt(args[1]);
-                            if (number == 1 || number == 2) {
-                                Data.cfg.set("plots.root." + number, player.getTargetBlock((Set<Material>) null, 5).getLocation());
-                                try {
-                                    Data.cfg.save(Data.file);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
+                        if (player.hasPermission("root")) {
+                            if (Math.isInt(args[1])) {
+                                int number = Integer.parseInt(args[1]);
+                                if (number == 1 || number == 2) {
+                                    Data.cfg.set("plots.root." + number, player.getTargetBlock((Set<Material>) null, 5).getLocation());
+                                    try {
+                                        Data.cfg.save(Data.file);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    player.sendMessage(Data.getPrefix() + "§aDie §6" + number + ". §aEcke wurde gesetzt.");
+                                } else {
+                                    player.sendMessage(Data.getPrefix() + "§cBitte verwende die Zahl 1 oder 2");
                                 }
-                                player.sendMessage(Data.getPrefix() + "§aDie §6" + number + ". §aEcke wurde gesetzt.");
                             } else {
                                 player.sendMessage(Data.getPrefix() + "§cBitte verwende die Zahl 1 oder 2");
                             }
                         } else {
-                            player.sendMessage(Data.getPrefix() + "§cBitte verwende die Zahl 1 oder 2");
+                            player.sendMessage(Data.getPrefix() + Data.getNoPermission());
                         }
 
                     } else if (args[0].equalsIgnoreCase("invite")) {
@@ -316,6 +322,7 @@ public class PlotCommand implements CommandExecutor {
         if (player.hasPermission("op")) {
             player.sendMessage("§e/p §6delete <Plotname> <Spieler> §8- §7Entfernt den Plot eines anderen Spielers (Admin)");
             player.sendMessage("§e/p §6root <1|2> §8- §7Setzt die Ecken des Ausgangs-Plot (Admin)");
+            player.sendMessage("§e/p §6version §8- §7Zeigt dir die Version des Plugins (Admin)");
         }
         player.sendMessage("§8§l---------§r§6 Plot-Hilfe §8§l---------");
     }
