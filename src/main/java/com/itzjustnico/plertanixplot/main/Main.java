@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.itzjustnico.plertanixplot.commands.PlotCommand;
 import com.itzjustnico.plertanixplot.listener.BlockBreakListener;
 import com.itzjustnico.plertanixplot.listener.BlockPlaceListener;
+import com.itzjustnico.plertanixplot.listener.InteractListener;
 import com.itzjustnico.plertanixplot.storage.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -47,6 +48,7 @@ public final class Main extends JavaPlugin {
         PluginManager pluginManager = Bukkit.getPluginManager();
         pluginManager.registerEvents(new BlockBreakListener(), this);
         pluginManager.registerEvents(new BlockPlaceListener(), this);
+        pluginManager.registerEvents(new InteractListener(), this);
     }
 
     private void registerCommands() {
