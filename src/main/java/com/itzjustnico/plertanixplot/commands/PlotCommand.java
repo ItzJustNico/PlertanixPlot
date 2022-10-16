@@ -87,7 +87,7 @@ public class PlotCommand implements CommandExecutor {
                             player.sendMessage(Data.getPrefix() + "§cDu hast noch keinen Plot.");
                         }
                     } else if (args[0].equalsIgnoreCase("version")) {
-                        if (player.hasPermission("version")) {
+                        if (player.hasPermission("plertanix.version")) {
                             player.sendMessage(Data.getPrefix() + "§6" + Main.getPlugin().getPluginDescriptionFile().getVersion());
                         } else {
                             player.sendMessage(Data.getPrefix() + Data.getNoPermission());
@@ -101,7 +101,7 @@ public class PlotCommand implements CommandExecutor {
                 } else if (args.length == 2) {
                     if (args[0].equalsIgnoreCase("create")) {
                         PlotHandler plotHandler = new PlotHandler();
-                        if (plotHandler.getPlotAmount(player) < (int) Data.cfg.get("plots.maxPlotAmount") || player.hasPermission("morePlots")) {
+                        if (plotHandler.getPlotAmount(player) < (int) Data.cfg.get("plots.maxPlotAmount") || player.hasPermission("plertanix.morePlots")) {
                             if (!plotHandler.checkIfNameDuplicate(player, args[1])) {
                                 if (Data.cfg.get("plots.root.1") != null && Data.cfg.get("plots.root.2") != null ) {
                                     if (Data.cfg.get("plots.plotSideLength") != null && Data.cfg.get("plots.blocksBetweenPlots") != null ) {
@@ -116,21 +116,21 @@ public class PlotCommand implements CommandExecutor {
                                                 Bukkit.getConsoleSender().sendMessage(Data.getPrefix() + ChatColor.GREEN + "A new Plot has been created!");
                                             }
                                         } else {
-                                            if (player.hasPermission("admin")) {
+                                            if (player.hasPermission("plertanix.admin")) {
                                                 player.sendMessage(Data.getPrefix() + "§cEs wurde noch keine Plot-größe eingestellt. Bitte stelle diese in der Config ein.");
                                             } else {
                                                 player.sendMessage(Data.getPrefix() + "§cEs wurde noch keine Plot-größe eingestellt. Bitte kontaktiere einen Admin.");
                                             }
                                         }
                                     } else {
-                                        if (player.hasPermission("admin")) {
+                                        if (player.hasPermission("plertanix.admin")) {
                                             player.sendMessage(Data.getPrefix() + "§cEs wurde noch keine Plot-größe eingestellt. Bitte stelle diese in der Config ein.");
                                         } else {
                                             player.sendMessage(Data.getPrefix() + "§cEs wurde noch keine Plot-größe eingestellt. Bitte kontaktiere einen Admin.");
                                         }
                                     }
                                 } else {
-                                    if (player.hasPermission("admin")) {
+                                    if (player.hasPermission("plertanix.admin")) {
                                         player.sendMessage(Data.getPrefix() + "§cEs wurde noch kein Ausgangs-Plot gesetzt. Bitte setzte diesen mit §6/p root§c.");
                                     } else {
                                         player.sendMessage(Data.getPrefix() + "§cEs wurde noch kein Ausgangs-Plot gesetzt. Bitte kontaktiere einen Admin.");
@@ -175,7 +175,7 @@ public class PlotCommand implements CommandExecutor {
                     } else if (args[0].equalsIgnoreCase("home")) {
                         new PlotHandler().teleportHome(args[1], player);
                     } else if (args[0].equalsIgnoreCase("root")) {
-                        if (player.hasPermission("root")) {
+                        if (player.hasPermission("plertanix.root")) {
                             if (Math.isInt(args[1])) {
                                 int number = Integer.parseInt(args[1]);
                                 if (number == 1 || number == 2) {
@@ -319,7 +319,7 @@ public class PlotCommand implements CommandExecutor {
         player.sendMessage("§e/p §6info §8- §7Gibt dir Informationen über den Plot auf dem du dich befindest");
         player.sendMessage("§e/p §6list <Spieler> §8- §7Zeigt dir alle deine Plots");
 
-        if (player.hasPermission("op")) {
+        if (player.hasPermission("plertanix.admin")) {
             player.sendMessage("§e/p §6delete <Plotname> <Spieler> §8- §7Entfernt den Plot eines anderen Spielers (Admin)");
             player.sendMessage("§e/p §6root <1|2> §8- §7Setzt die Ecken des Ausgangs-Plot (Admin)");
             player.sendMessage("§e/p §6version §8- §7Zeigt dir die Version des Plugins (Admin)");

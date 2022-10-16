@@ -15,7 +15,7 @@ public class BlockBreakListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         PlotHandler plotHandler = new PlotHandler();
-        if (!player.hasPermission("blockBreakPerm")) {
+        if (!player.hasPermission("plertanix.breakplotblocks")) {
             if (!plotHandler.hasPlot(player)) {
                 event.setCancelled(true);
                 player.sendMessage(Data.getPrefix() + "§cDu kannst diesen Block nicht zerstören!");

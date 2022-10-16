@@ -15,7 +15,7 @@ public class BlockPlaceListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         PlotHandler plotHandler = new PlotHandler();
-        if (!player.hasPermission("blockPlacePerm")) {
+        if (!player.hasPermission("plertanix.blockPlacePerm")) {
             if (!plotHandler.hasPlot(player)) {
                 event.setCancelled(true);
                 player.sendMessage(Data.getPrefix() + "§cDu kannst diesen Block hier nicht platzieren!");
