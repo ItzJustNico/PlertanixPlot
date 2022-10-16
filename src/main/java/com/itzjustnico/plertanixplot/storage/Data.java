@@ -13,7 +13,7 @@ public class Data {
 
     private static final String noPermission = "§cDazu hast du keine Rechte!";
     private static final String noPlayer = "§cDiesen Command dürfen nur Spieler ausführen";
-    private static final String prefix = "§7[§6Plertanix§7] ";
+    private static final String prefix = "§l§6[§bB§aB§cO§6] ";
 
     public static String getNoPermission() {
         return noPermission;
