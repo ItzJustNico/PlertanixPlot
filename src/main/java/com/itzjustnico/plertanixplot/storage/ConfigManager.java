@@ -15,9 +15,6 @@ public class ConfigManager {
         if (Data.cfg.get("plots.blocksBetweenPlots") == null) {
             Data.cfg.set("plots.blocksBetweenPlots", 5);
         }
-        if (Data.cfg.get("plots.root") == null) {
-            Data.cfg.set("plots.root", null);
-        }
 
         try {
             Data.cfg.save(Data.file);

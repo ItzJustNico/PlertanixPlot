@@ -29,7 +29,7 @@ public final class Main extends JavaPlugin {
         pluginDescriptionFile = getDescription();
         listenerRegistration();
         registerCommands();
-        new ConfigManager().registerConfig();
+        //new ConfigManager().registerConfig();
 
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "==================================================================");
         Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "PlertanixPlot wurde erfolgreich gestartet!");
