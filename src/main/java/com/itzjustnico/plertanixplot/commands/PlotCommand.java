@@ -296,9 +296,10 @@ public class PlotCommand implements CommandExecutor {
                     sendHelp(player);
                 }
             } else {
-                sender.sendMessage(Data.getNoPlayer());
+                sendHelp(player);
             }
-
+        } else {
+            sender.sendMessage(Data.getNoPlayer());
         }
         return false;
     }
