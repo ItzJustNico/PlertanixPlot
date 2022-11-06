@@ -356,8 +356,7 @@ public class PlotHandler {
     public boolean checkBlockOnPlotBreakable(Player player, Block block) {
         System.out.println("checkBlock " + block);
         PlotData plotData = getPlotFromBlock(block);
-        //plotData.getOwner().equals(player.getUniqueId()) ||
-        if (plotData.getTrustedPlayers().contains(player.getUniqueId())) {
+        if (plotData.getOwner().equals(player.getUniqueId()) || plotData.getTrustedPlayers().contains(player.getUniqueId())) {
             return true;
         }
         return false;
