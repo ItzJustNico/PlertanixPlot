@@ -63,6 +63,7 @@ public class PlotCommand implements CommandExecutor {
                             String message = "§7Vertraut: §e";
                             int i = 0;
                             for (UUID uuid : trustedPlayer) {
+                            for (UUID uuid : trustedPlayer) {
                                 if (i > 0) {
                                     message += "§7, §e";
                                 }
